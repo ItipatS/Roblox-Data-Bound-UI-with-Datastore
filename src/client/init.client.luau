@@ -1,0 +1,1 @@
+local InventoryManager = require(script.UI.InventoryManager)
