@@ -72,7 +72,9 @@ src/
 - Skill trees, upgrade menus, radial UIs
 
 ## Demo Video
-[![Watch the video](https://img.youtube.com/vi/0NLv2Lb7Fcc/0.jpg)](https://www.youtube.com/watch?v=0NLv2Lb7Fcc)
+<a href="https://www.youtube.com/watch?v=0NLv2Lb7Fcc" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.youtube.com/vi/0NLv2Lb7Fcc/0.jpg" alt="Watch the video">
+</a>
 
 ---
 
