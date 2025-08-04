@@ -4,7 +4,7 @@ local MainLocalProfile = {}
 local HTTPService = game:GetService("HttpService")
 local Replicated = game:GetService("ReplicatedStorage")
 
-local ProfileUpdatedRE  = Replicated.Remotes.ProfileUpdated
+local ProfileUpdatedRE  = Replicated:WaitForChild("ProfileUpdated")
 
 local profileData = nil
 local listeners = {}

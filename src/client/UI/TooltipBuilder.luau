@@ -89,7 +89,6 @@ function TooltipBuilder.BuildTooltip(itemData ,modData ,uiData)
 		end
 		
 		-- Header for Scaling
-		
 		if itemData.Stat and itemData.Stat.Scaling then
 			table.insert(tooltipLines, "-- Scaling --")
 			for statKey, statValue in pairs(itemData.Stat.Scaling) do
@@ -116,7 +115,7 @@ function TooltipBuilder.BuildTooltip(itemData ,modData ,uiData)
 		if modData.AdditionalStats then
 			table.insert(tooltipLines, "-- Attributes --")
 			for modName, modValue in pairs(modData.AdditionalStats) do
-				table.insert(tooltipLines, modName .. ": " .. tostring(modValue))
+				table.insert(tooltipLines, modName .. ": " .. tostring(modValue) .. "%")
 			end
 		end
 

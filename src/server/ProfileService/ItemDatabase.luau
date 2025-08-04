@@ -1,8 +1,12 @@
 -- ServerStorage.Modules.ItemDatabase.lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerStorage = game:GetService("ServerStorage")
 
-local GetDatabaseRF = ReplicatedStorage.Remotes.GetDatabase
+local GetDatabaseRF = Instance.new("RemoteFunction", ReplicatedStorage)
+GetDatabaseRF.Name = "GetDatabase"
+local EquipItemEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+EquipItemEvent.Name = "EquipItemEvent"
+local UnequipItemEvent = Instance.new("RemoteEvent", ReplicatedStorage)
+UnequipItemEvent.Name = "UnequipItemEvent"
 local ItemDatabase = {}
 
 -- This stores flat data (key -> itemData)
@@ -44,6 +48,7 @@ local function loadAll()
 			flattenModule(module)
 		end
 	end
+	print(flatData)
 end
 
 -- Public API

@@ -1,23 +1,8 @@
 -- ServerStorage.Modules.Blades
-local Blades = {}
-
--- Recursive deep copy function for tables.
-local function DeepCopy(original)
-	local copy = {}
-	for k, v in pairs(original) do
-		if type(v) == "table" then
-			copy[k] = DeepCopy(v)
-		else
-			copy[k] = v
-		end
-	end
-	return copy
-end
-
--- Blade database. BaseStats are now defined as ranges.
-Blades.Data = {
+local Blades = {
 	AzakanaBlade = {
-		Tier = 'demon',
+		Tier = 'Demon',
+		Rarity = "Legendary",
 		Tradable = true,
 		Category = "Blade",
 		Type = "Katana",
@@ -65,10 +50,11 @@ Blades.Data = {
 
 	},
 	MoonLightBlade = {
-		Tier = 'moon',
+		Tier = 'Moon',
+		Rarity = "Legendary",
 		Tradable = true,
 		Category = "Blade",
-		Type = "Great Sword",
+		Type = "GreatSword",
 		Model = "MoonLightBody", -- This corresponds to a model name in ReplicatedStorage.
 		Stat = {
 			BaseStats = {
@@ -114,37 +100,5 @@ Blades.Data = {
 	},
 	-- Add more blades here as needed.
 }
-
--- Generates a randomized copy of a blade based on its base data.
--- This function randomizes the base stats from the defined ranges and initializes an empty AdditionalStats table.
-function Blades:GenerateRandomBlade(bladeID)
-	local baseData = self.Data[bladeID]
-	if not baseData then
-		warn("Blade ID not found: " .. tostring(bladeID))
-		return nil
-	end
-
-	local blade = DeepCopy(baseData)
-
-	-- Randomize base stats: for each stat, choose a random value between the min and max.
-	for statName, range in pairs(blade.Stat.BaseStats) do
-		local value = math.random(range.min * 100, range.max * 100) / 100
-		blade.Stat.BaseStats[statName] = value
-	end
-
-	-- Prepare an empty table for additional modifiers (such as gemstone bonus, Burning, CritBoost, etc.)
-	blade.AdditionalStats = {}
-
-	return blade
-end
-
--- Returns a copy of the base blade data without randomization.
-function Blades:GetBladeFromID(bladeID)
-	local data = self.Data[bladeID]
-	if data then
-		return DeepCopy(data)
-	end
-	return nil
-end
 
 return Blades

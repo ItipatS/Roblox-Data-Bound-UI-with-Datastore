@@ -1,5 +1,6 @@
 --ServerStorage.System.DataService
 local DataService = {}
+
 local ProfileService = require(script.Parent.ProfileService)
 local DataManager = require(script.Parent.DataManager)
 
@@ -9,16 +10,61 @@ local RunService = game:GetService("RunService")
 local function GetStoreName()
     return RunService:IsStudio() and "Test" or "Live"
 end
+
 local ProfileTemplate = {
-	HGem = 0,
-	Coin = 0,
-	Exp = 0,
-	Level = 0,
-	Point = 0,
-	Quest = {},
-	Inventory = {},
+	
+	Inventory = {
+		stackable = {
+			-- e.g., [itemID] = { quantity = 5, type = "Consumable", ... }
+		},
+		unstackable = {
+			-- e.g., { ID = "AzakanaBlade", Type = "Blade", other properties... }
+		}
+	},
+	
+	Equipment = {
+		Helmet = nil,
+		ChestPlate = nil,
+		Leggings = nil,
+		Acc1 = nil,
+		Acc2 = nil,
+		Acc3 = nil,
+		Acc4 = nil,
+		RightHand = nil,
+		LeftHand = nil,
+	},
+	Passives = {},
+
+	VoxlSoul = 0,
+	Level = 1,
+	Strength = 5,
+	Vitality = 5,
+	Agility = 5,
+	Dexterity = 5,
+	Intelligence = 5,
+	Endurance = 5,
+	Arcane = 5,
+	Faith = 5,
+	Luck = 5,
+
 	LogInTimes = 0,
 	TotalGameTime = 0,
+	TotalKill = 0,
+	BossDefeat = 0,
+	TotalDeath = 0,
+	UnusualDeaths = {
+		Fall = 0,
+	},
+	HighestDamageDealt = 0,
+	Quest ={},
+	AchievementsEarned = {
+		"None"
+	},
+	DistanceTraveled = 0,
+	FavoriteBlade = "None",
+	FavoriteHandle = "None",
+	FavoriteStance = "None",
+	PrismaticDefeat = 0,
 }
 
 local GameProfileStore = ProfileService.New(GetStoreName(), ProfileTemplate )
@@ -28,7 +74,7 @@ local function DoSomethingWithALoadedProfile(player, profile)
 	 	
 	if profile.Data.LogInTimes == 1 then
 		-- Initialize inventory for new players
-		profile.Data.Inventory["Carrot"] = {Quantity = 1}
+		profile.Data.Inventory["RainbowVoxel"] = {Quantity = 1}
 	end
 	
 	DataManager.JoinTimes[player] = tick()

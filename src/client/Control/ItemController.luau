@@ -5,8 +5,8 @@ local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local EquipItemEvent = game.ReplicatedStorage.Remotes.EquipItemEvent
-local UnequipItemEvent = game.ReplicatedStorage.Remotes.UnEquipItemEvent
+local EquipItemEvent = game.ReplicatedStorage:WaitForChild("EquipItemEvent")
+local UnequipItemEvent = game.ReplicatedStorage:WaitForChild("UnequipItemEvent")
 -- Internal state: stores info for the currently selected item.
 local selectedItem = nil  -- Table with keys: itemData, originalSlot, dragProxy, quantity, inputConnections
 local dragProxy = nil     -- Current drag proxy UI element
@@ -138,9 +138,6 @@ function ItemController.SelectItem(itemFrame, itemData, itemconfig)
 				if validTarget then
 					-- Use the TargetType attribute if available, otherwise fall back to the object's Name.
 					local targetType = validTarget:GetAttribute("TargetType") or validTarget.Name
-					print("targetType: ",targetType)
-					print("validTarget: ",validTarget)
-					print("selectedItem: ", selectedItem)
 					
 					if selectedItem.originalSlot.Parent.Name and targetType == selectedItem.originalSlot.Parent.Name then
 						ItemController.CancelSelection()
@@ -171,7 +168,6 @@ end
 -- Returns true if the drop is valid and the item is placed.
 function ItemController.PlaceItem(targetSlot, targetSlotType)
 	if not selectedItem then return false end
-	print("selectedItemType : ",selectedItem.itemconfig.Type)
 
 	-- Validate the drop: check if the selected item's Type is allowed in the target slot.
 	local slotToAllowedType = {
@@ -186,7 +182,6 @@ function ItemController.PlaceItem(targetSlot, targetSlotType)
 	}
 
 	local allowedTypes = slotToAllowedType[selectedItem.itemconfig.Type]
-	print("Type allow : ", targetSlotType, "," , allowedTypes)
 
 	if targetSlotType == "ItemSlots" or targetSlotType == "Any" then
 		if selectedItem.originalSlot.Parent.Name ~= targetSlotType then
@@ -241,7 +236,6 @@ end
 
 -- Cancels the current selection and returns the item to its original slot.
 function ItemController.CancelSelection()
-	print("cancel : ", selectedItem)
 	if selectedItem then
 		if selectedItem.originalSlot then
 			selectedItem.originalSlot.Visible = true

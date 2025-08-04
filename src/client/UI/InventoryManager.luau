@@ -1,9 +1,9 @@
 -- InventoryManager.lua (ModuleScript in ReplicatedStorage or a LocalModules folder)
 local InventoryManager = {}
 --Data
-local MainLocalProfile = require(script.Parent.Parent.Data.MainLocalProfile) -- Or your datastore System
+local MainLocalProfile = require(script.Parent.Parent.Data.MainLocalProfile)
 local DatabaseCache = require(script.Parent.Parent.Data.ClientDatabaseCache)
-local MainDatabase = DatabaseCache.GetData() -- Or YourDatabase
+local MainDatabase = DatabaseCache.GetData()
 local UIManager = require(script.Parent.UI)
 local UIData = require(script.Parent.Parent.Data.UIData)
 local TooltipBuilder = require(script.Parent.TooltipBuilder)
@@ -11,6 +11,7 @@ local TierEffectManager  = require(script.Parent.TierEffectManager)
 
 --Service
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -19,14 +20,15 @@ local Interface = LocalPlayer.PlayerGui.Interface
 local inventory =  UIManager:GetUIElement("Inventory")
 local equipments =  UIManager:GetUIElement("Equipments")
 local InventorySlots = inventory.ItemSlots
-
+local callback
 
 local Replicated = game:GetService("ReplicatedStorage")
-local Assets = Replicated.Models
 
 local spinningModel = {}
 
-local InformationFrame = script.InformationFrame:Clone()
+local GUITemplate = StarterGui.Template
+local InformationFrame = GUITemplate.InformationFrame
+local ItemTemplate = GUITemplate.ItemTemplate
 
 local lastRotationTime = 0 -- Keep track of the last rotation time
 local currentCategory = "All"  -- default category
@@ -52,7 +54,10 @@ local getMaid = require(Replicated.Shared.Maid)
 local Maid = getMaid.new()  -- Global maid for InventoryManager connections
 
 local function setupModel(itemConfig, frame)
-	local modelAsset = Assets:FindFirstChild(itemConfig.Model)
+	local modelAsset = Replicated.ArmorsPreview:FindFirstChild(itemConfig.Model)
+						or Replicated.Bodys:FindFirstChild(itemConfig.Model)
+						or Replicated.Handles:FindFirstChild(itemConfig.Model)
+						or Replicated.Items:FindFirstChild(itemConfig.Model)
 	if modelAsset then
 		local clonedModel = modelAsset:Clone()
 		clonedModel.CFrame = itemConfig.Viewport.Model
@@ -73,32 +78,31 @@ end
 local function updateTooltip(itemData, modData)
 	-- Set the standard tooltip text for the description
 	local tooltipText = TooltipBuilder.BuildTooltip(itemData, modData, UIData)
-	InformationFrame.TextLabel.Text = tooltipText
-	InformationFrame.NameLabel.Text = itemData.Name or "Unnamed"
+	InformationFrame.CapFrame.TextLabel.Text = tooltipText
+	InformationFrame.CapFrame.NameLabel.Text = itemData.Name or "Unnamed"
 	InformationFrame.Parent = Interface
 
 	local tier = UIData:GetTier(itemData.Tier)
-
 	-- Clear any previous effects.
-	TierEffectManager.ClearEffects(stopFunctions, InformationFrame.NameLabel, tier)
+	TierEffectManager.ClearEffects(stopFunctions, InformationFrame.CapFrame.NameLabel, tier)
 	if typeof(tier) == "Color3" then
-		InformationFrame.NameLabel.TextColor3 = tier
+		InformationFrame.CapFrame.NameLabel.TextColor3 = tier
 	end
 
-	stopFunctions = TierEffectManager.ApplyEffects(InformationFrame.NameLabel, tier)
+	stopFunctions = TierEffectManager.ApplyEffects(InformationFrame.CapFrame.NameLabel, tier)
 
 	InformationFrame.Visible = true
 
 end
 
 
-local function onItemMouseEnter(inventoryFrame, itemConfig, itemInstance)
+local function onItemMouseEnter(itemFrame, itemConfig, itemInstance)
 	-- Store the original color using an attribute for later restoration
-	local lastColor = inventoryFrame.ImageColor3
-	inventoryFrame:SetAttribute("LastColor", lastColor)
+	local lastColor = itemFrame.ImageColor3
+	itemFrame:SetAttribute("LastColor", lastColor)
 
 	-- Darken the background slightly
-	inventoryFrame.ImageColor3 = Color3.new(0.5,  0.5, 0.5)
+	itemFrame.ImageColor3 = Color3.new(0.5,  0.5, 0.5)
 
 	-- Update the tooltip. For unstackable items, pass itemInstance; for stackable, it’s nil.
 	if itemInstance then
@@ -108,43 +112,43 @@ local function onItemMouseEnter(inventoryFrame, itemConfig, itemInstance)
 	end
 
 	-- Position the tooltip relative to the inventory frame
-	local centerX = inventoryFrame.AbsolutePosition.X + inventoryFrame.AbsoluteSize.X / 2
-	local centerY = inventoryFrame.AbsolutePosition.Y + inventoryFrame.AbsoluteSize.Y / 2
+	local centerX = itemFrame.AbsolutePosition.X
+	local centerY = itemFrame.AbsolutePosition.Y + itemFrame.AbsoluteSize.Y / 2
 	InformationFrame.Position = UDim2.new(0, centerX, 0, centerY)
 end
 
-local function onItemMouseLeave(inventoryFrame)
+local function onItemMouseLeave(itemFrame)
 	-- Restore original color
-	local lastColor = inventoryFrame:GetAttribute("LastColor")
+	local lastColor = itemFrame:GetAttribute("LastColor")
 	if lastColor then
-		inventoryFrame.ImageColor3 = lastColor
+		itemFrame.ImageColor3 = lastColor
 	end
 	InformationFrame.Visible = false
 end
 
-local function createInventoryFrame(itemConfig, identifier)
+local function createItemFrame(itemConfig, identifier)
 
-	local inventoryFrame:ImageButton = script.ItemTemplate:Clone()
-	inventoryFrame.Name = identifier
+	local itemFrame:ImageButton = ItemTemplate:Clone()
+	itemFrame.Name = identifier
 
 	-- Set border properties from the config
 	for property, propertyValue in pairs(itemConfig.Border or {}) do
 		if property == "ImageRectOffset" then
-			inventoryFrame.ImageRectOffset = UIData.Bordercalculate(propertyValue)
+			itemFrame.ImageRectOffset = UIData.Bordercalculate(propertyValue)
 		elseif property == "ImageColor3" then
 
 			if typeof(UIData:GetTier(itemConfig.Tier)) ~= "Color3" then
 
-				inventoryFrame.ImageColor3 = Color3.new(1, 1, 1)
+				itemFrame.ImageColor3 = Color3.new(1, 1, 1)
 			else
-				inventoryFrame.ImageColor3 = UIData:GetTier(itemConfig.Tier)
+				itemFrame.ImageColor3 = UIData:GetTier(itemConfig.Tier)
 			end
 		else
-			inventoryFrame.property = propertyValue
+			itemFrame.property = propertyValue
 		end
 	end
 
-	return inventoryFrame
+	return itemFrame
 end
 
 function InventoryManager.Update(profileData)
@@ -154,38 +158,37 @@ function InventoryManager.Update(profileData)
 
 	local InventoryIDCached = {}
 
-
 	for itemID, itemData  in pairs(profileData.Inventory.stackable) do
 
 		local quantity = itemData.Quantity
 		local itemConfig = MainDatabase[itemID]
 		if not itemConfig then continue end
 
-		local inventoryFrame:ImageButton = InventorySlots:FindFirstChild(itemID)
-		if not inventoryFrame then
-			inventoryFrame = createInventoryFrame(itemConfig, itemID)
-			inventoryFrame.LayoutOrder = quantity
+		local itemFrame:ImageButton = InventorySlots:FindFirstChild(itemID)
+		if not itemFrame then
+			itemFrame = createItemFrame(itemConfig, itemID)
+			itemFrame.LayoutOrder = quantity
 
-			setupModel(itemConfig, inventoryFrame)
+			setupModel(itemConfig, itemFrame)
 
-			inventoryFrame.Parent = InventorySlots
+			itemFrame.Parent = InventorySlots
 
-			Maid:GiveTask(inventoryFrame.MouseEnter:Connect(function()
-				onItemMouseEnter(inventoryFrame, itemConfig)
+			Maid:GiveTask(itemFrame.MouseEnter:Connect(function()
+				onItemMouseEnter(itemFrame, itemConfig)
 			end))
-			Maid:GiveTask(inventoryFrame.MouseLeave:Connect(function()
-				onItemMouseLeave(inventoryFrame)
+			Maid:GiveTask(itemFrame.MouseLeave:Connect(function()
+				onItemMouseLeave(itemFrame)
 			end))
-			Maid:GiveTask(inventoryFrame.MouseButton1Click:Connect(function()
-				ItemController.SelectItem(inventoryFrame, itemData, itemConfig)
+			Maid:GiveTask(itemFrame.MouseButton1Click:Connect(function()
+				ItemController.SelectItem(itemFrame, itemData, itemConfig)
 			end))
 
 		end
 
 		if quantity > 1 then
-			inventoryFrame.Quantity.Text = 'x' .. quantity
+			itemFrame.Quantity.Text = 'x' .. quantity
 		else
-			inventoryFrame.Quantity.Text = ''
+			itemFrame.Quantity.Text = ''
 		end
 
 		table.insert(InventoryIDCached, itemID)
@@ -199,29 +202,30 @@ function InventoryManager.Update(profileData)
 
 		-- Create a unique frame name, for instance itemID_index
 		local frameName = itemInstance.ID .. "_" .. index
-		local inventoryFrame:ImageButton = InventorySlots:FindFirstChild(frameName)
-		if not inventoryFrame then
+		-- Check if the frame already exists in the inventory slots.
+		local itemFrame:ImageButton = InventorySlots:FindFirstChild(frameName)
+		if not itemFrame then
 			-- Layout order can be based on index or other criteria.
-			inventoryFrame = createInventoryFrame(itemConfig, frameName)
-			inventoryFrame.LayoutOrder = index
+			itemFrame = createItemFrame(itemConfig, frameName)
+			itemFrame.LayoutOrder = index
 
-			setupModel(itemConfig, inventoryFrame)
+			setupModel(itemConfig, itemFrame)
 
-			inventoryFrame.Parent = InventorySlots
+			itemFrame.Parent = InventorySlots
 
-			Maid:GiveTask(inventoryFrame.MouseEnter:Connect(function()
-				onItemMouseEnter(inventoryFrame, itemConfig, itemInstance)
+			Maid:GiveTask(itemFrame.MouseEnter:Connect(function()
+				onItemMouseEnter(itemFrame, itemConfig, itemInstance)
 			end))
-			Maid:GiveTask(inventoryFrame.MouseLeave:Connect(function()
-				onItemMouseLeave(inventoryFrame)
+			Maid:GiveTask(itemFrame.MouseLeave:Connect(function()
+				onItemMouseLeave(itemFrame)
 			end))
-			Maid:GiveTask(inventoryFrame.MouseButton1Click:Connect(function()
-				ItemController.SelectItem(inventoryFrame, itemInstance, itemConfig)
+			Maid:GiveTask(itemFrame.MouseButton1Click:Connect(function()
+				ItemController.SelectItem(itemFrame, itemInstance, itemConfig)
 			end))
 
 		end
 
-		inventoryFrame.Quantity.Text = ""
+		itemFrame.Quantity.Text = ""
 
 		-- For unstackable items, there's no quantity text unless you choose to display uniqueness info.
 		table.insert(InventoryIDCached, frameName)
@@ -234,6 +238,7 @@ function InventoryManager.Update(profileData)
 		end
 	end
 end
+
 
 function InventoryManager.UpdateEquipment(profileData)
 	-- your equipment container
@@ -252,7 +257,7 @@ function InventoryManager.UpdateEquipment(profileData)
 			if not equipmentFrame then
 				-- Clear previous content in the equipment slot
 				-- Create an equipment frame from a template (like your inventory template)
-				equipmentFrame = createInventoryFrame(itemConfig, frameName)
+				equipmentFrame = createItemFrame(itemConfig, frameName)
 				-- Setup the model or icon
 				setupModel(itemConfig, equipmentFrame)
 	
@@ -347,10 +352,9 @@ end)
 
 
 -- Initialization function for the Inventory Manager
-local function Init()
-	print("what")
+local function Initialize()
 	-- Subscribe to profile updates
-	MainLocalProfile.Subscribe(function(profileData)
+	callback = MainLocalProfile.Subscribe(function(profileData)
 		if profileData and profileData.Inventory then
 			InventoryManager.Update(profileData)
 			InventoryManager.UpdateEquipment(profileData)
@@ -371,7 +375,5 @@ local function Init()
 	end]]
 
 end
-
-Init()
-
+Initialize()
 return InventoryManager

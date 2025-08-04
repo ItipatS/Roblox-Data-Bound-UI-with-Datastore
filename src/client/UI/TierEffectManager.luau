@@ -1,12 +1,11 @@
 -- TierEffectManager.lua
 local TweenManager = require(script.Parent.TweenManager)
-
 local TierEffectManager = {}
 
 -- Internal mapping from tier names to functions that start their effects.
 local tierEffects = {
 	-- For the rainbow tier, we pass in the configuration (colorSequence, direction, duration)
-	demon = function(nameLabel, config)
+	Demon = function(nameLabel, config)
 		local options = {
 			colorSequence = config.colorSequence,
 			direction = config.direction,
@@ -19,7 +18,7 @@ local tierEffects = {
 		}
 	end,
 	
-	rainbow = function(nameLabel, config)
+	Rainbow = function(nameLabel, config)
 		local options = {
 			colorSequence = config.colorSequence,
 			direction = config.direction,
@@ -32,7 +31,7 @@ local tierEffects = {
 		}
 	end,
 	
-	test = function(nameLabel, config)
+	Test = function(nameLabel, config)
 		local options = {
 			colorSequence = config.colorSequence,
 			direction = config.direction,

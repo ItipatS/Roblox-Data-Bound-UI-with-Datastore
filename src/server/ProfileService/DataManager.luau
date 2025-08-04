@@ -1,5 +1,7 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataManager = {}
-local ProfileUpdatedRE = game.ReplicatedStorage.Remotes.ProfileUpdated
+local ProfileUpdatedRE = Instance.new("RemoteEvent", ReplicatedStorage)
+ProfileUpdatedRE.Name = "ProfileUpdated"
 DataManager.Profiles = {}
 DataManager.JoinTimes = {}
 

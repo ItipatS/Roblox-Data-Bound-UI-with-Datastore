@@ -29,8 +29,8 @@ UIData.Tier = {
 	eight = Color3.new(1, 0, 0.0156863),
 	nine = Color3.new(0.352941, 1, 1),
 	-- For the rainbow tier, we now store a table with our effect configuration.
-	rainbow = {
-		effect = "rainbow",
+	Rainbow = {
+		effect = "Rainbow",
 		colorSequence = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
 			ColorSequenceKeypoint.new(0.166, Color3.fromRGB(255,165,0)),
@@ -44,8 +44,8 @@ UIData.Tier = {
 		duration = 1,
 	},
 	-- For the rainbow tier, we now store a table with our effect configuration.
-	demon = {
-		effect = "demon",
+	Demon = {
+		effect = "Demon",
 		colorSequence = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
 			ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 0, 0)),
@@ -56,8 +56,8 @@ UIData.Tier = {
 		duration = 2,
 	},
 	
-	test = {
-		effect = "test",
+	Test = {
+		effect = "Test",
 		colorSequence = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
 			ColorSequenceKeypoint.new(0.166, Color3.fromRGB(190, 250, 255)),

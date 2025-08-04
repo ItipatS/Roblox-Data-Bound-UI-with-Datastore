@@ -1,10 +1,8 @@
 -- ServerStorage.Modules.Handles
-local Handles = {}
-
--- Handle data
-Handles.Data = {
+local Handles = {
 	AzakanaHandle = {
-		Tier = 'demon',
+		Tier = 'Demon',
+		Rarity = "Legendary",
 		Tradable = true,
 		Category = "Handle",
 		Model = "AzakanaHandle", -- Model name in ServerStorage
@@ -45,7 +43,8 @@ Handles.Data = {
 		Stackable = false
 	},
 	MoonLightHandle = {
-		Tier = 'moon',
+		Tier = 'Moon',
+		Rarity = "Legendary",
 		Tradable = true,
 		Category = "Handle",
 		Type = "Long Handle",
@@ -89,50 +88,5 @@ Handles.Data = {
 
 	},
 }
-
-local function DeepCopy(original)
-	local copy = {}
-	for k, v in pairs(original) do
-		if type(v) == "table" then
-			copy[k] = DeepCopy(v)
-		else
-			copy[k] = v
-		end
-	end
-	return copy
-end
-
-function Handles:GenerateRandomBlade(bladeID)
-	local baseData = self.Data[bladeID]
-	if not baseData then
-		warn("Blade ID not found: " .. tostring(bladeID))
-		return nil
-	end
-
-	local blade = DeepCopy(baseData)
-
-	-- Randomize base stats: for each stat, choose a random value between the min and max.
-	for statName, range in pairs(blade.Stat.BaseStats) do
-		local value = math.random(range.min * 100, range.max * 100) / 100
-		blade.Stat.BaseStats[statName] = value
-	end
-
-	-- Prepare an empty table for additional modifiers (such as gemstone bonus, Burning, CritBoost, etc.)
-	blade.AdditionalStats = {}
-
-	return blade
-end
-
-
-function Handles:GetHandleFromID(HandleID)
-	for index, HandleData in ipairs(Handles.Data) do
-		if HandleData.ID == HandleID then
-			local modifiedItemData = DeepCopy(HandleData)
-			return modifiedItemData
-		end
-	end
-	return nil
-end
-
 
 return Handles
